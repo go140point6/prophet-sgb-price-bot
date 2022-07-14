@@ -1,6 +1,5 @@
 require('dotenv').config() // Load .env file
 require('log-timestamp')
-//const axios = require('axios')
 const ethers = require('ethers')
 const { Client, Intents } = require('discord.js')
 
@@ -64,6 +63,12 @@ const ftsoRegistryContract = new ethers.Contract(
 
 //console.log(ftsoRegistryContract)
   
+function sleep(ms) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
+
 async function getGuild() {
   guild = client.guilds.cache.get(`${process.env.SERVER_ID}`)
   if(!guild) {
@@ -108,17 +113,31 @@ async function getBOT() {
 
 async function clearRoles() {
   let redRole = member.roles.cache.some(role => role.name === ('tickers-red'))
+  console.log('clearRole red 1 is ', redRole)
   if (redRole) {
     try {
       await (member.roles.remove(red))
+      redRole = member.roles.cache.some(role => role.name === ('tickers-red'))
+      console.log('clearRole red 2 is ', redRole)
+      await sleep(1000)
+      await (member.roles.remove(red))
+      redRole = member.roles.cache.some(role => role.name === ('tickers-red'))
+      console.log('clearRole red 3 is ', redRole)
     } catch (error) {
       console.log('red role still present', error)
     }
   }
   let greenRole = member.roles.cache.some(role => role.name === ('tickers-green'))
+  console.log('clearRole green 1 is ', greenRole)
   if (greenRole) {
     try {
       await (member.roles.remove(green))
+      greenRole = member.roles.cache.some(role => role.name === ('tickers-green'))
+      console.log('clearRole green 2 is ', greenRole)
+      await sleep(1000)
+      await (member.roles.remove(green))
+      greenRole = member.roles.cache.some(role => role.name === ('tickers-green'))
+      console.log('clearRole green 3 is ', greenRole)
     } catch (error) {
       console.log('green role still present', error)
     }
@@ -127,17 +146,31 @@ async function clearRoles() {
   
 async function setRed() {
   let redRole = member.roles.cache.some(role => role.name === ('tickers-red'))
+  console.log('setRed red 1 is ', redRole)
   if (!redRole) {
     try {
       await (member.roles.add(red))
+      redRole = member.roles.cache.some(role => role.name === ('tickers-red'))
+      console.log('setRed red 2 is ', redRole)
+      await sleep(1000)
+      await (member.roles.add(red))
+      redRole = member.roles.cache.some(role => role.name === ('tickers-red'))
+      console.log('setRed red 3 is ', redRole)
     } catch (error) {
       console.log('RED but red role missing', error)
     }
   }
   let greenRole = member.roles.cache.some(role => role.name === ('tickers-green'))
+  console.log('setRed green 1 is ', greenRole)
   if (greenRole) {
     try {
       await (member.roles.remove(green))
+      greenRole = member.roles.cache.some(role => role.name === ('tickers-green'))
+      await console.log('setRed green 2 is ', greenRole)
+      await sleep(1000)
+      await (member.roles.remove(green))
+      greenRole = member.roles.cache.some(role => role.name === ('tickers-green'))
+      await console.log('setRed green 3 is ', greenRole)
     } catch (error) {
       console.log('RED but green role still present', error)
     }
@@ -146,17 +179,31 @@ async function setRed() {
 
 async function setGreen() {
   let redRole = member.roles.cache.some(role => role.name === ('tickers-red'))
+  console.log('setGreen red 1 is ', redRole)
   if (redRole) {
     try {
       await (member.roles.remove(red))
+      redRole = member.roles.cache.some(role => role.name === ('tickers-red'))
+      await console.log('setGreen red 2 is ', redRole)
+      await sleep(1000)
+      await (member.roles.remove(red))
+      redRole = member.roles.cache.some(role => role.name === ('tickers-red'))
+      await console.log('setGreen red 3 is ', redRole)
     } catch (error) {
       console.log('GREEN but red role still present', error)
     }
   }
   let greenRole = member.roles.cache.some(role => role.name === ('tickers-green'))
+  console.log('setGreen green 1 is ', greenRole)
   if (!greenRole) {
     try {
       await (member.roles.add(green))
+      greenRole = member.roles.cache.some(role => role.name === ('tickers-green'))
+      await console.log('setGreen green 2 is ', greenRole)
+      await sleep(1000)
+      await (member.roles.add(green))
+      greenRole = member.roles.cache.some(role => role.name === ('tickers-green'))
+      await console.log('setGreen green 3 is ', greenRole)
     } catch (error) {
       console.log('GREEN but green role missing', error)
     }
@@ -232,7 +279,6 @@ async function getInitialPrice() {
   let symbol = `${process.env.COIN_ID.toUpperCase()}`
   client.user.setPresence({
     activities: [{
-    //name: `SGB: ${sgbPrice} per ${symbol}`,
     name: `SGB=${proSGBPrice} ${symbol}`,
     type: `PLAYING`
     }]
@@ -320,12 +366,10 @@ async function getPrices() {
   })
 
   if (currentPrice > lastPrice) {
-    clearRoles()
     console.log('up')
     arrow = up
     setGreen()
     } else if (currentPrice < lastPrice) {
-      clearRoles()
       console.log('down')
       arrow = down
       setRed()
@@ -347,7 +391,6 @@ client.on('ready', () => {
   getGuild()
   getBOT()
   findRoles()
-  clearRoles()
   getInitialPrice() // Ping server once on startup
   // Ping the server and set the new status message every x minutes. (Minimum of 1 minute)
   setInterval(getPrices, Math.max(1, process.env.UPDATE_FREQUENCY || 1) * 60 * 1000)
